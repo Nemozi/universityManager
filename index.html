@@ -32,9 +32,8 @@
     
     <!-- Sidebar -->
     <aside class="sidebar item">
-      <a href="#" class="sidebarHeader">Nemo Ziener</a>
-      <a href="#" class="sidebarText">Schedule</a>
-      <a href="#" id="add-exam-btn" class="sidebarText">+ Add Test/Exam</a>
+      <a href="#" class="sidebarHeader">Stasch</a>
+      <a href="#" id="add-exam-btn" class="sidebarText">+ Add Exam</a>
     </aside>
 
     <!-- Header / Navigation Bar -->
@@ -52,21 +51,9 @@
     <!-- Main Schedule Section -->
     <main class="schedule-container item">
       <div class="timetable" id="timetable">
-        <!-- Time Axis Column -->
         <div class="time-column">
-        <div class="time-header"></div> <!-- Header spacer for 30px alignment -->
-        <div class="time-slot">08:00</div>
-        <div class="time-slot">09:00</div>
-        <div class="time-slot">10:00</div>
-        <div class="time-slot">11:00</div>
-        <div class="time-slot">12:00</div>
-        <div class="time-slot">13:00</div>
-        <div class="time-slot">14:00</div>
-        <div class="time-slot">15:00</div>
-        <div class="time-slot">16:00</div>
-        <div class="time-slot">17:00</div>
-        <div class="time-slot">18:00</div>
-        <div class="time-slot">19:00</div>
+        <div class="time-header"></div>
+        <div class="time-labels" id="time-labels"></div>
         </div>
 
         <!-- Days Column Container -->
@@ -107,7 +94,7 @@
   <!-- Add Exam / Test Modal -->
   <div id="exam-modal" class="modal hidden">
     <div class="modal-content item">
-      <h3>Add Exam or Test</h3>
+      <h3>Add Exam</h3>
       <form id="exam-form">
         <label>Title / Course Code:</label>
         <input type="text" id="exam-title" placeholder="e.g. 20846 - Econometrics II" required />

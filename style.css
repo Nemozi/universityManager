@@ -13,11 +13,17 @@
   --color-secondary: #E38EAC;
   --color-accent: #DAA969;
   --color-accent-secondary: #B2DFDB;
-  
+
   --event-pink: #f1b2be;
   --event-blue: #93c2d6;
   --event-green: #a7cb98;
   --event-orange: #f8a07c;
+
+  /* Timetable scale: everything derives from these */
+  --hours: 12;                          /* 08:00 – 20:00 (must match START_HOUR/END_HOUR in app.js) */
+  --hour-h: clamp(3.5rem, 7vh, 5.5rem); /* height of one hour, scales with the viewport */
+  --header-h: 2.25rem;                  /* day header height */
+  --time-col-w: 4.5rem;
 }
 
 body {
@@ -26,12 +32,11 @@ body {
   max-width: 100vw;
   background-color: var(--color-background);
   min-height: 100vh;
-  font-family: 'Satoshi', system-ui, -apple-system, sans-serif;
+  font-family: 'Satoshi', 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
   color: #111;
   overflow-x: hidden;
 }
 
-/* Custom Font Declarations */
 @font-face {
   font-family: 'Satoshi';
   src: url('./assets/fonts/Satoshi-Regular.woff2') format('woff2');
@@ -42,7 +47,7 @@ body {
 }
 
 .font-gambetta {
-  font-family: 'Gambetta', serif;
+  font-family: 'Gambetta', 'Playfair Display', serif;
 }
 
 /* Authentication Overlay */
@@ -63,7 +68,7 @@ body {
   flex-direction: column;
   gap: 1rem;
   width: 90%;
-  max-width: 360px;
+  max-width: 22.5rem;
 }
 .login-card input {
   padding: 0.8rem;
@@ -88,8 +93,7 @@ body {
   display: grid;
   grid-template-columns: 0.2fr repeat(9, 1fr);
   grid-template-rows: auto 1fr;
-  column-gap: 0.5rem;
-  row-gap: 0.5rem;
+  gap: 0.5rem;
   padding: 0.5rem;
   min-height: 100vh;
 }
@@ -113,22 +117,22 @@ body {
   gap: 2rem;
   background-color: var(--color-light-primary);
 }
-
 .sidebarText {
   color: black;
   text-decoration: none;
   font-size: 1.1rem;
   cursor: pointer;
-  padding: 4px;
+  padding: 0.25rem;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  background-color: yellow;
 }
-
 .sidebarHeader {
   color: black;
   text-decoration: none;
   font-size: 1.3rem;
-  font-family: 'Gambetta', serif;
+  font-family: 'Gambetta', 'Playfair Display', serif;
 }
-
 .sidebarText:hover {
   background-color: var(--color-primary);
   color: var(--color-background);
@@ -168,118 +172,125 @@ body {
   grid-column: 2 / 11;
   grid-row: 2;
   overflow-x: auto;
-  position: relative;
   padding: 1rem 0.5rem;
 }
 
 .timetable {
   display: flex;
-  position: relative;
-  min-width: 700px;
-  height: 720px; /* 12 slots * 60px */
-  border-top: 1px solid #ccc;
+  min-width: 43rem;
 }
 
+/* Time axis */
 .time-column {
-  width: 70px;
+  width: var(--time-col-w);
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
 }
-.time-slot {
-  height: 60px;
+.time-header {
+  height: var(--header-h);        /* same height as .day-header */
+}
+.time-labels {
+  position: relative;
+  height: calc(var(--hours) * var(--hour-h)); /* same height as .events-container */
+}
+.time-label {
+  position: absolute;
+  right: 0.5rem;
+  transform: translateY(-50%);    /* label is centred on its hour line */
   font-size: 0.8rem;
+  line-height: 1;
   color: #666;
-  border-bottom: 1px dashed #e0e0e0;
 }
 
+/* Days */
 .days-wrapper {
   display: flex;
-  flex-grow: 1;
-  position: relative;
-  transition: transform 0.3s ease-in-out;
+  flex: 1;
+  min-width: 0;
 }
-
 .day-column {
   flex: 1;
+  min-width: 0;
   border-left: 1px solid #ddd;
-  position: relative;
   display: flex;
   flex-direction: column;
 }
-
 .day-header {
-  height: 30px;
-  text-align: center;
+  height: var(--header-h);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-weight: bold;
   border-bottom: 1px solid black;
   background-color: rgba(0,0,0,0.02);
 }
+.day-column.today .day-header {
+  background-color: var(--color-light-primary);
+}
 
+/* The hour lines are drawn by the background, so they always match the labels */
 .events-container {
   position: relative;
-  height: 690px; /* Total height minus day header */
+  height: calc(var(--hours) * var(--hour-h));
+  background-image: linear-gradient(to bottom, #e3e3e3 1px, transparent 1px);
+  background-size: 100% var(--hour-h);
+  border-bottom: 1px solid #e3e3e3;
 }
 
-/* Event Block Cards */
+/* Event cards: top/height/left/width are set as percentages by app.js */
 .event-card {
   position: absolute;
-  left: 3px;
-  right: 3px;
   border: 1px solid rgba(0,0,0,0.4);
-  padding: 6px;
-  font-size: 0.75rem;
-  border-radius: 2px;
+  padding: 0.3rem 0.4rem;
+  font-size: clamp(0.65rem, 0.5rem + 0.3vw, 0.85rem);
   overflow: hidden;
-  box-shadow: 2px 2px 0px rgba(0,0,0,0.15);
+  box-shadow: 0.1rem 0.1rem 0 rgba(0,0,0,0.15);
   transition: transform 0.1s ease;
 }
-
 .event-card:hover {
   transform: scale(1.01);
   z-index: 10;
 }
-
-.event-card.pink { background-color: var(--event-pink); }
-.event-card.blue { background-color: var(--event-blue); }
-.event-card.green { background-color: var(--event-green); }
+.event-card.pink   { background-color: var(--event-pink); }
+.event-card.blue   { background-color: var(--event-blue); }
+.event-card.green  { background-color: var(--event-green); }
 .event-card.orange { background-color: var(--event-orange); }
 
-.event-title { font-weight: bold; margin-bottom: 2px; }
-.event-type { font-style: italic; }
-.event-room { font-family: monospace; margin-top: 2px; }
+.event-time {
+  font-weight: bold;
+  border-bottom: 1px solid rgba(0,0,0,0.15);
+  padding-bottom: 0.1rem;
+  margin-bottom: 0.15rem;
+}
+.event-title { font-weight: bold; margin-bottom: 0.1rem; }
+.event-type  { font-style: italic; }
+.event-room  { font-family: monospace; margin-top: 0.1rem; }
 
-/* Live Time Indicator Line */
+/* Live time indicator – lives inside today's .events-container */
 .live-marker {
   position: absolute;
-  left: 70px;
+  left: 0;
   right: 0;
   height: 2px;
+  margin-top: -1px;
   background-color: red;
   z-index: 20;
   pointer-events: none;
 }
-.marker-dot {
+.live-marker::before {
+  content: "";
   position: absolute;
-  left: -5px;
-  top: -4px;
-  width: 10px;
-  height: 10px;
+  left: -0.3rem;
+  top: 50%;
+  width: 0.6rem;
+  height: 0.6rem;
+  transform: translateY(-50%);
   background-color: red;
   border-radius: 50%;
 }
-.marker-label {
-  position: absolute;
-  left: 10px;
-  top: -18px;
-  background: red;
-  color: white;
-  font-size: 0.7rem;
-  padding: 1px 4px;
-  border-radius: 2px;
-}
 
-/* Modal Styling */
+/* Modal */
 .modal {
   position: fixed;
   inset: 0;
@@ -290,11 +301,10 @@ body {
   z-index: 10000;
 }
 .modal.hidden, .hidden { display: none !important; }
-
 .modal-content {
   padding: 1.5rem;
   width: 90%;
-  max-width: 420px;
+  max-width: 26rem;
   background: var(--color-background);
 }
 .modal-content form {
@@ -317,27 +327,18 @@ body {
   border: 1px solid black;
   cursor: pointer;
 }
-/* Alignment header for time column */
-.time-header {
-  height: 30px;
-  border-bottom: 1px solid black;
-  background-color: rgba(0, 0, 0, 0.02);
-}
 
-/* Event time label inside card */
-.event-time {
-  font-weight: bold;
-  font-size: 0.7rem;
-  margin-bottom: 2px;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.15);
-  padding-bottom: 1px;
+.modal-actions .danger {
+  margin-right: auto;
+  color: #d32f2f;
+  background: var(--color-background);
 }
-/* Mobile Responsive Adjustments & Touch Swipe Layout */
+.event-card { cursor: pointer; }
+
+/* Mobile */
 @media (max-width: 700px) {
-  .gridContainer {
-    grid-template-columns: 1fr;
-    padding: 0;
-  }
+  :root { --hour-h: 4.5rem; --time-col-w: 3.5rem; }
+  .gridContainer { grid-template-columns: 1fr; padding: 0; }
   .sidebar {
     grid-column: 1;
     grid-row: auto;
@@ -346,28 +347,10 @@ body {
     flex-direction: row;
     justify-content: space-between;
   }
-  .header {
-    grid-column: 1;
-    grid-row: auto;
-  }
-  .mobile-day-selector {
-    display: flex;
-  }
-  .schedule-container {
-    grid-column: 1;
-    overflow-x: hidden;
-  }
-  .timetable {
-    min-width: 100%;
-  }
-  .days-wrapper {
-    width: 100%;
-  }
-  .day-column {
-    min-width: 100%;
-    display: none; /* JS switches visible active day on mobile */
-  }
-  .day-column.active-mobile {
-    display: flex;
-  }
+  .header { grid-column: 1; grid-row: auto; }
+  .mobile-day-selector { display: flex; }
+  .schedule-container { grid-column: 1; overflow-x: hidden; }
+  .timetable { min-width: 100%; }
+  .day-column { display: none; }          /* JS shows the active day */
+  .day-column.active-mobile { display: flex; }
 }
