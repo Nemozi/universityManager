@@ -45,7 +45,7 @@ let currentPerson = PEOPLE[0].id;
 let loadToken = 0;
 
 // --- Passcode ---
-const CORRECT_PASS = "Nemo";
+const CORRECT_PASS = "Fabra";
 
 document.getElementById('login-btn').addEventListener('click', handleLogin);
 function handleLogin() {
