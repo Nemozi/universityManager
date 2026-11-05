@@ -36,6 +36,14 @@ const initialEvents = [
 let events = [];
 let currentMobileDay = 0;
 
+// --- People / schedules (first entry is the default) ---
+const PEOPLE = [
+  { id: 'stasch', label: 'Stasch' },
+  { id: 'nemo', label: 'Nemo' }
+];
+let currentPerson = PEOPLE[0].id;
+let loadToken = 0;
+
 // --- Passcode ---
 const CORRECT_PASS = "Nemo";
 
@@ -185,20 +193,19 @@ function renderEvents() {
   updateLiveMarker();
 }
 
-// --- Load events ---
-async function loadEvents() {
+// --- Load events of one person ---
+async function fetchEvents(person) {
   if (supabaseClient) {
     try {
-      const { data, error } = await supabaseClient.from('exams').select('*');
-      if (!error && data && data.length > 0) {
-        events = data;
-        return;
-      }
+      const { data, error } = await supabaseClient.from('exams').select('*').eq('person', person);
+      if (error) console.warn('Supabase error:', error.message);
+      else if (data && data.length > 0) return data;
     } catch (err) {
-      console.warn('Supabase fetch failed, using initialEvents.', err);
+      console.warn('Supabase fetch failed.', err);
     }
   }
-  events = [...initialEvents];
+  // Offline fallback: the built-in timetable belongs to the default person
+  return person === PEOPLE[0].id ? [...initialEvents] : [];
 }
 
 // --- Live marker: only in today's column, positioned in % of the same scale ---
@@ -236,6 +243,8 @@ const form = document.getElementById('exam-form');
 const modalTitle = modal.querySelector('h3');
 const typeSelect = document.getElementById('exam-type');
 const saveBtn = document.getElementById('save-exam-btn');
+const ADD_TITLE = modalTitle.textContent;   // keeps whatever wording index.html uses
+const ADD_SAVE = saveBtn.textContent;
 let editingEvent = null;   // the event being edited, or null when adding
 
 // Delete button is created here, so index.html needs no change
@@ -260,8 +269,8 @@ function openModal(ev = null) {
     document.getElementById('exam-end').value = toHM(toMinutes(ev.end));
     document.getElementById('exam-room').value = ev.room;
   }
-  modalTitle.textContent = ev ? 'Edit Event' : 'Add Exam or Test';
-  saveBtn.textContent = ev ? 'Save Changes' : 'Save Event';
+  modalTitle.textContent = ev ? 'Edit Event' : ADD_TITLE;
+  saveBtn.textContent = ev ? 'Save Changes' : ADD_SAVE;
   deleteBtn.classList.toggle('hidden', !ev);
   modal.classList.remove('hidden');
 }
@@ -306,7 +315,7 @@ form.addEventListener('submit', async (e) => {
     Object.assign(editingEvent, data);
   } else {
     // INSERT
-    const newEvent = { ...data, color: 'orange' };
+    const newEvent = { ...data, color: 'orange', person: currentPerson };
     let saved = newEvent;
     if (supabaseClient) {
       const { data: rows, error } = await supabaseClient.from('exams').insert([newEvent]).select();
@@ -339,11 +348,36 @@ deleteBtn.addEventListener('click', async () => {
   closeModal();
 });
 
+// --- Switch schedule by clicking the name in the sidebar ---
+const nameLink = document.querySelector('.sidebarHeader');
+nameLink.style.cursor = 'pointer';
+
+function updateNameLink() {
+  const idx = PEOPLE.findIndex(p => p.id === currentPerson);
+  const next = PEOPLE[(idx + 1) % PEOPLE.length];
+  nameLink.textContent = PEOPLE[idx].label;
+  nameLink.title = `Click to show ${next.label}'s schedule`;
+}
+
+nameLink.addEventListener('click', async (e) => {
+  e.preventDefault();
+  const idx = PEOPLE.findIndex(p => p.id === currentPerson);
+  currentPerson = PEOPLE[(idx + 1) % PEOPLE.length].id;
+  updateNameLink();
+
+  const token = ++loadToken;
+  const list = await fetchEvents(currentPerson);
+  if (token !== loadToken) return;      // a newer click already won
+  events = list;
+  renderEvents();
+});
+
 // --- Init ---
 window.addEventListener('DOMContentLoaded', async () => {
   renderHeaders();
   renderTimeAxis();
-  await loadEvents();
+  updateNameLink();
+  events = await fetchEvents(currentPerson);
   renderEvents();
 
   setInterval(() => {
