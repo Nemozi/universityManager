@@ -7,6 +7,13 @@
   <link rel="stylesheet" href="style.css" />
   <!-- Optional Supabase Client CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- Inline Favicon to silence favicon.ico 404 -->
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>Schedule</text></svg>">
+
+<!-- Google Fonts (replaces missing local Satoshi & Gambetta files) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,400&family=Plus+Jakarta+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
@@ -47,18 +54,19 @@
       <div class="timetable" id="timetable">
         <!-- Time Axis Column -->
         <div class="time-column">
-          <div class="time-slot">08:00</div>
-          <div class="time-slot">09:00</div>
-          <div class="time-slot">10:00</div>
-          <div class="time-slot">11:00</div>
-          <div class="time-slot">12:00</div>
-          <div class="time-slot">13:00</div>
-          <div class="time-slot">14:00</div>
-          <div class="time-slot">15:00</div>
-          <div class="time-slot">16:00</div>
-          <div class="time-slot">17:00</div>
-          <div class="time-slot">18:00</div>
-          <div class="time-slot">19:00</div>
+        <div class="time-header"></div> <!-- Header spacer for 30px alignment -->
+        <div class="time-slot">08:00</div>
+        <div class="time-slot">09:00</div>
+        <div class="time-slot">10:00</div>
+        <div class="time-slot">11:00</div>
+        <div class="time-slot">12:00</div>
+        <div class="time-slot">13:00</div>
+        <div class="time-slot">14:00</div>
+        <div class="time-slot">15:00</div>
+        <div class="time-slot">16:00</div>
+        <div class="time-slot">17:00</div>
+        <div class="time-slot">18:00</div>
+        <div class="time-slot">19:00</div>
         </div>
 
         <!-- Days Column Container -->
