@@ -15,7 +15,7 @@ const TOTAL_MIN = (END_HOUR - START_HOUR) * 60;
 
 // Fallback schedule
 const initialEvents = [
-  { day: 0, start: "12:30", end: "14:00", title: "20846 - Econometrics II", type: "Group 102 - Seminar", room: "Classroom 20.047", color: "pink" },
+  { day: 0, start: "12:30", end: "14:00", title: "20846 - Econometrics II", type: "Group 102 - Seminar", room: "Classroom 20.047", color: "orange" },
   { day: 0, start: "15:00", end: "16:30", title: "25259 - Financial Derivatives & Risk Mgmt", type: "Group 1 - Theory", room: "Classroom 13.007", color: "blue" },
   { day: 0, start: "17:00", end: "18:30", title: "26178 - Multivariate Data Analysis", type: "Group 1 - Theory", room: "Classroom 40.063", color: "green" },
 
