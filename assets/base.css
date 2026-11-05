@@ -1,0 +1,22 @@
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+
+  font-weight: normal;
+}
+
+body{
+    --color-background: #FAFFFD;
+  --color-light-primary: #B2DFDB;
+  --color-primary: #077187;
+  --color-secondary: #E38EAC;
+  --color-accent: #DAA969;
+  --color-accent-secondary: #B2DFDB;
+  
+  max-width: 100vw;
+  background-color: var(--color-background);
+  height: 100vh;
+
+}

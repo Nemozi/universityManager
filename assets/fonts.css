@@ -1,0 +1,146 @@
+/* Define custom fonts */
+@font-face {
+    font-family: 'Satoshi';
+    src: url('../assets/fonts/Satoshi-Regular.woff2') format('woff2'),
+         url('../assets/fonts/Satoshi-Regular.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+  }
+  
+  @font-face {
+    font-family: 'Gambetta';
+    src: url('../assets/fonts/Gambetta-Regular.woff2') format('woff2'),
+         url('../assets/fonts/Gambetta-Regular.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+  }
+  
+  @font-face {
+    font-family: 'Yuji Syuku';
+    src: url('../assets/fonts/YujiSyuku-Regular.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+  }
+  @font-face {
+    font-family: 'PicNic';
+    src: url('../src/assets/fonts/PicNic-Regular.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+  }
+  
+  @font-face {
+    font-family: 'Gensco';
+    src: url('../assets/fonts/GENSCO.otf') format('opentype'),
+         url('../assets/fonts/GENSCO.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+  }
+
+  @font-face {
+    font-family: 'monor';
+    src: url('../assets/fonts/Monor_Regular.otf') format('opentype'),
+         url('../assets/fonts/Monor_Regular.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+  }
+  @font-face {
+    font-family: 'BackOut';
+    src: url('../assets/fonts/BackOut.woff2') format('woff2'),
+         url('../assets/fonts/BackOut.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+  }
+  
+  @font-face {
+    font-family: 'CLT Aujournuit';
+    src: url('../assets/fonts/Aujournuit-Airy.woff2') format('woff2'),
+         url('../assets/fonts/CLT_Aujournuit.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+  }
+  
+  @font-face {
+    font-family: 'CLT Coconat';
+    src: url('../assets/fonts/Coconat-Regular.woff2') format('woff2'),
+         url('../assets/fonts/CLT_Coconat.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+  }
+  
+  @font-face {
+    font-family: 'CLT Necto Mono';
+    src: url('../src/assets/fonts/NectoMono-Regular.woff2') format('woff2'),
+         url('../assets/fonts/CLT_Necto_Mono.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+  }
+  
+  @font-face {
+    font-family: 'typefesse-master';
+    src: url('../assets/fonts/Typefesse_Claire-Obscure.woff2.woff2') format('woff2'),
+         url('../assets/fonts/typefesse-master.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+  }
+  
+  @font-face {
+    font-family: 'zarathustra';
+    src: url('../assets/fonts/zarathustra.woff2') format('woff2'),
+         url('../assets/fonts/zarathustra.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+  }
+  @font-face {
+    font-family: 'PT Mono';
+    src: url('../assets/fonts/PTMono-Regular.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+  }
+  
+/*
+.content-grid-fonts {
+    position: absolute;
+    left: 3vw;
+    top: 2vw;
+    width: calc(100vw - 3vw);
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    background-blend-mode: normal;
+    box-sizing: border-box;
+}
+
+.content-block-fonts {
+  display: flex;
+  background-color: var(--color-background, #68CADE);
+margin-left: 5rem;
+font-family: Satoshi;
+
+}
+.block-1-fonts {
+  font-size: 4rem;
+  font-family: Gambetta;
+}
+.block-2-fonts {
+    font-size: 4rem;
+    font-family: Yuji Syuku;
+
+}
+.block-3-fonts {
+    font-size: 4rem;
+    font-family: Gensco;
+
+}
+.block-4-fonts {
+    font-size: 4rem;
+    font-family: BackOut;
+
+}
+.block-5-fonts {
+    font-size: 4rem;
+    font-family:monor;
+}
+.block-6-fonts {
+    font-size: 4rem;
+    font-family:PicNic;
+}
+*/
