@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Schedule View</title>
+  <link rel="stylesheet" href="style.css" />
+  <!-- Optional Supabase Client CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+
+  <!-- Password Overlay -->
+  <div id="login-overlay" class="login-overlay">
+    <div class="login-card">
+      <h2>Enter Passcode</h2>
+      <input type="password" id="password-input" placeholder="Password (default: 1234)" />
+      <button id="login-btn">Unlock Schedule</button>
+      <p id="login-error" class="error-text"></p>
+    </div>
+  </div>
+
+  <!-- Main Grid Layout -->
+  <div class="gridContainer">
+    
+    <!-- Sidebar -->
+    <aside class="sidebar item">
+      <a href="#" class="sidebarHeader">Nemo Ziener</a>
+      <a href="#" class="sidebarText">Schedule</a>
+      <a href="#" id="add-exam-btn" class="sidebarText">+ Add Test/Exam</a>
+    </aside>
+
+    <!-- Header / Navigation Bar -->
+    <header class="header item">
+      <div class="header-content">
+        <h1 class="font-gambetta">October 19 – 23, 2026</h1>
+        <div class="mobile-day-selector">
+          <button id="prev-day-btn">&larr;</button>
+          <span id="current-day-label">Monday 19</span>
+          <button id="next-day-btn">&rarr;</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Schedule Section -->
+    <main class="schedule-container item">
+      <div class="timetable" id="timetable">
+        <!-- Time Axis Column -->
+        <div class="time-column">
+          <div class="time-slot">08:00</div>
+          <div class="time-slot">09:00</div>
+          <div class="time-slot">10:00</div>
+          <div class="time-slot">11:00</div>
+          <div class="time-slot">12:00</div>
+          <div class="time-slot">13:00</div>
+          <div class="time-slot">14:00</div>
+          <div class="time-slot">15:00</div>
+          <div class="time-slot">16:00</div>
+          <div class="time-slot">17:00</div>
+          <div class="time-slot">18:00</div>
+          <div class="time-slot">19:00</div>
+        </div>
+
+        <!-- Days Column Container -->
+        <div class="days-wrapper" id="days-wrapper">
+          <!-- Day Columns injected via JS or predefined -->
+          <div class="day-column" data-day="0">
+            <div class="day-header">19 Monday</div>
+            <div class="events-container" id="day-0"></div>
+          </div>
+          <div class="day-column" data-day="1">
+            <div class="day-header">20 Tuesday</div>
+            <div class="events-container" id="day-1"></div>
+          </div>
+          <div class="day-column" data-day="2">
+            <div class="day-header">21 Wednesday</div>
+            <div class="events-container" id="day-2"></div>
+          </div>
+          <div class="day-column" data-day="3">
+            <div class="day-header">22 Thursday</div>
+            <div class="events-container" id="day-3"></div>
+          </div>
+          <div class="day-column" data-day="4">
+            <div class="day-header">23 Friday</div>
+            <div class="events-container" id="day-4"></div>
+          </div>
+        </div>
+
+        <!-- Live Current Time Line Marker -->
+        <div id="live-marker" class="live-marker hidden">
+          <span class="marker-dot"></span>
+          <span id="live-time-label" class="marker-label"></span>
+        </div>
+      </div>
+    </main>
+
+  </div>
+
+  <!-- Add Exam / Test Modal -->
+  <div id="exam-modal" class="modal hidden">
+    <div class="modal-content item">
+      <h3>Add Exam or Test</h3>
+      <form id="exam-form">
+        <label>Title / Course Code:</label>
+        <input type="text" id="exam-title" placeholder="e.g. 20846 - Econometrics II" required />
+        
+        <label>Type:</label>
+        <select id="exam-type">
+          <option value="Exam">Exam</option>
+          <option value="Test">Midterm / Test</option>
+          <option value="Seminar">Seminar</option>
+        </select>
+
+        <label>Day:</label>
+        <select id="exam-day">
+          <option value="0">Monday 19</option>
+          <option value="1">Tuesday 20</option>
+          <option value="2">Wednesday 21</option>
+          <option value="3">Thursday 22</option>
+          <option value="4">Friday 23</option>
+        </select>
+
+        <label>Start Time:</label>
+        <input type="time" id="exam-start" value="11:00" required />
+
+        <label>End Time:</label>
+        <input type="time" id="exam-end" value="12:30" required />
+
+        <label>Room / Location:</label>
+        <input type="text" id="exam-room" placeholder="Classroom 40.148" required />
+
+        <div class="modal-actions">
+          <button type="button" id="close-modal-btn">Cancel</button>
+          <button type="submit" id="save-exam-btn">Save Event</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
