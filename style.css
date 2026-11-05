@@ -334,7 +334,58 @@ body {
   background: var(--color-background);
 }
 .event-card { cursor: pointer; }
+/* --- Week & Calendar Controls --- */
+.week-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
 
+.week-nav button, .week-nav input[type="date"] {
+  border: 1px solid black;
+  background: var(--color-background);
+  padding: 0.35rem 0.75rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+  border-radius: 2px;
+}
+
+.week-nav button:hover {
+  background-color: var(--color-light-primary);
+}
+
+.week-nav input[type="date"] {
+  cursor: pointer;
+}
+
+/* Event Badge for Specific Date Exams */
+.event-badge {
+  font-weight: bold;
+  font-size: 0.65rem;
+  background: rgba(0, 0, 0, 0.85);
+  color: #fff;
+  padding: 1px 4px;
+  border-radius: 2px;
+  display: inline-block;
+  margin-bottom: 0.15rem;
+}
+
+.event-card.date-specific {
+  border: 2px solid #000;
+  box-shadow: 0.2rem 0.2rem 0 rgba(0,0,0,0.3);
+}
+
+@media (max-width: 700px) {
+  .header-content {
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: flex-start;
+  }
+  .week-nav {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
 /* Mobile */
 @media (max-width: 700px) {
   :root { --hour-h: 4.5rem; --time-col-w: 3.5rem; }

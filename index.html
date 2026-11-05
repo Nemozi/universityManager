@@ -5,15 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Schedule View</title>
   <link rel="stylesheet" href="style.css" />
-  <!-- Optional Supabase Client CDN -->
+  <!-- Supabase Client CDN -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <!-- Inline Favicon to silence favicon.ico 404 -->
-<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>Schedule</text></svg>">
+  <!-- Inline Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📅</text></svg>">
 
-<!-- Google Fonts (replaces missing local Satoshi & Gambetta files) -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,400&family=Plus+Jakarta+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,400&family=Plus+Jakarta+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
@@ -33,16 +33,26 @@
     <!-- Sidebar -->
     <aside class="sidebar item">
       <a href="#" class="sidebarHeader">Stasch</a>
-      <a href="#" id="add-exam-btn" class="sidebarText">+ Add Exam</a>
+      <a href="#" id="add-exam-btn" class="sidebarText">+ exam or event</a>
     </aside>
 
     <!-- Header / Navigation Bar -->
     <header class="header item">
       <div class="header-content">
-        <h1 class="font-gambetta">October 19 – 23, 2026</h1>
+        <h1 class="font-gambetta" id="week-title">Loading...</h1>
+
+        <!-- Week & Calendar Navigation -->
+        <div class="week-nav">
+          <button id="prev-week-btn" title="Previous Week">&lsaquo; Prev</button>
+          <button id="today-btn">Today</button>
+          <button id="next-week-btn" title="Next Week">Next &rsaquo;</button>
+          <input type="date" id="jump-date-picker" title="Jump to date" />
+        </div>
+
+        <!-- Mobile Day Selector -->
         <div class="mobile-day-selector">
           <button id="prev-day-btn">&larr;</button>
-          <span id="current-day-label">Monday 19</span>
+          <span id="current-day-label">Monday</span>
           <button id="next-day-btn">&rarr;</button>
         </div>
       </div>
@@ -52,68 +62,75 @@
     <main class="schedule-container item">
       <div class="timetable" id="timetable">
         <div class="time-column">
-        <div class="time-header"></div>
-        <div class="time-labels" id="time-labels"></div>
+          <div class="time-header"></div>
+          <div class="time-labels" id="time-labels"></div>
         </div>
 
         <!-- Days Column Container -->
         <div class="days-wrapper" id="days-wrapper">
-          <!-- Day Columns injected via JS or predefined -->
           <div class="day-column" data-day="0">
-            <div class="day-header">19 Monday</div>
+            <div class="day-header">Monday</div>
             <div class="events-container" id="day-0"></div>
           </div>
           <div class="day-column" data-day="1">
-            <div class="day-header">20 Tuesday</div>
+            <div class="day-header">Tuesday</div>
             <div class="events-container" id="day-1"></div>
           </div>
           <div class="day-column" data-day="2">
-            <div class="day-header">21 Wednesday</div>
+            <div class="day-header">Wednesday</div>
             <div class="events-container" id="day-2"></div>
           </div>
           <div class="day-column" data-day="3">
-            <div class="day-header">22 Thursday</div>
+            <div class="day-header">Thursday</div>
             <div class="events-container" id="day-3"></div>
           </div>
           <div class="day-column" data-day="4">
-            <div class="day-header">23 Friday</div>
+            <div class="day-header">Friday</div>
             <div class="events-container" id="day-4"></div>
           </div>
-        </div>
-
-        <!-- Live Current Time Line Marker -->
-        <div id="live-marker" class="live-marker hidden">
-          <span class="marker-dot"></span>
-          <span id="live-time-label" class="marker-label"></span>
         </div>
       </div>
     </main>
 
   </div>
 
-  <!-- Add Exam / Test Modal -->
+  <!-- Add / Edit Modal -->
   <div id="exam-modal" class="modal hidden">
     <div class="modal-content item">
-      <h3>Add Exam</h3>
+      <h3>Add Event</h3>
       <form id="exam-form">
         <label>Title / Course Code:</label>
-        <input type="text" id="exam-title" placeholder="e.g. 20846 - Econometrics II" required />
+        <input type="text" id="exam-title" placeholder="e.g. 20846 - Econometrics II Exam" required />
         
         <label>Type:</label>
         <select id="exam-type">
           <option value="Exam">Exam</option>
           <option value="Test">Midterm / Test</option>
           <option value="Seminar">Seminar</option>
+          <option value="Theory">Theory</option>
         </select>
 
-        <label>Day:</label>
-        <select id="exam-day">
-          <option value="0">Monday 19</option>
-          <option value="1">Tuesday 20</option>
-          <option value="2">Wednesday 21</option>
-          <option value="3">Thursday 22</option>
-          <option value="4">Friday 23</option>
+        <label>Scheduling Mode:</label>
+        <select id="exam-mode">
+          <option value="date">Specific Date (One-Off / Exam)</option>
+          <option value="recurring">Weekly Recurring Day</option>
         </select>
+
+        <div id="specific-date-group">
+          <label>Date:</label>
+          <input type="date" id="exam-date" />
+        </div>
+
+        <div id="recurring-day-group" class="hidden">
+          <label>Day of Week:</label>
+          <select id="exam-day">
+            <option value="0">Monday</option>
+            <option value="1">Tuesday</option>
+            <option value="2">Wednesday</option>
+            <option value="3">Thursday</option>
+            <option value="4">Friday</option>
+          </select>
+        </div>
 
         <label>Start Time:</label>
         <input type="time" id="exam-start" value="11:00" required />

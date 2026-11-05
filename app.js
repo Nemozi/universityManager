@@ -13,7 +13,7 @@ const END_HOUR = 20;
 const START_MIN = START_HOUR * 60;
 const TOTAL_MIN = (END_HOUR - START_HOUR) * 60;
 
-// Fallback schedule
+// Default recurring weekly classes (day: 0=Mon, 1=Tue, ..., 4=Fri)
 const initialEvents = [
   { day: 0, start: "12:30", end: "14:00", title: "20846 - Econometrics II", type: "Group 102 - Seminar", room: "Classroom 20.047", color: "orange" },
   { day: 0, start: "15:00", end: "16:30", title: "25259 - Financial Derivatives & Risk Mgmt", type: "Group 1 - Theory", room: "Classroom 13.007", color: "blue" },
@@ -30,13 +30,16 @@ const initialEvents = [
   { day: 3, start: "15:00", end: "16:30", title: "26178 - Multivariate Data Analysis", type: "Group 101 - Seminar", room: "Classroom 40.153", color: "green" },
 
   { day: 4, start: "11:00", end: "12:30", title: "20846 - Econometrics II", type: "Group 1 - Theory", room: "Classroom 40.148", color: "orange" },
-  { day: 4, start: "13:00", end: "14:30", title: "23171 - Principles of Public Economics", type: "Group 1 - Theory", room: "Classroom 40.144", color: "pink" }
+  { day: 4, start: "13:00", end: "14:30", title: "23171 - Principles of Public Economics", type: "Group 1 - Theory", room: "Classroom 40.144", color: "pink" },
+
+  // Example of a specific date exam (Format: YYYY-MM-DD)
+  { date: "2026-11-04", start: "09:00", end: "11:00", title: "Econometrics II Final Exam", type: "Exam", room: "Auditorium 1", color: "orange" }
 ];
 
 let events = [];
 let currentMobileDay = 0;
 
-// --- People / schedules (first entry is the default) ---
+// --- People / schedules ---
 const PEOPLE = [
   { id: 'stasch', label: 'Stasch' },
   { id: 'nemo', label: 'Nemo' }
@@ -61,8 +64,32 @@ if (localStorage.getItem('sched_authenticated') === 'true') {
   document.getElementById('login-overlay').classList.add('hidden');
 }
 
+// --- Date & Week Navigation State ---
+function getMonday(d) {
+  const date = new Date(d);
+  const day = date.getDay();
+  const diff = date.getDate() - day + (day === 0 ? -6 : 1); // adjust when day is sunday
+  return new Date(date.setDate(diff));
+}
+
+function formatDateISO(d) {
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+let currentMonday = getMonday(new Date());
+
+function getWeekDates(mondayDate) {
+  return Array.from({ length: 5 }, (_, i) => {
+    const d = new Date(mondayDate);
+    d.setDate(d.getDate() + i);
+    return d;
+  });
+}
+
 // --- Time helpers ---
-// Accepts "12:30", "12:30:00" (Supabase time columns), "8:05" -> minutes since midnight
 function toMinutes(t) {
   const m = String(t).match(/(\d{1,2}):(\d{2})/);
   return m ? Number(m[1]) * 60 + Number(m[2]) : NaN;
@@ -70,30 +97,22 @@ function toMinutes(t) {
 function toHM(min) {
   return `${String(Math.floor(min / 60)).padStart(2, '0')}:${String(min % 60).padStart(2, '0')}`;
 }
-// Minutes -> percentage of the visible timetable height (resolution independent)
 function toPercent(min) {
   return ((min - START_MIN) / TOTAL_MIN) * 100;
 }
 
-// --- Week handling: always show the current week (Sat/Sun -> next week) ---
-function getWeekDates() {
-  const now = new Date();
-  const dow = now.getDay();                        // 0 = Sun ... 6 = Sat
-  const mondayOffset = dow === 0 ? 1 : dow === 6 ? 2 : 1 - dow;
-  const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() + mondayOffset);
-  return Array.from({ length: 5 }, (_, i) =>
-    new Date(monday.getFullYear(), monday.getMonth(), monday.getDate() + i));
-}
-let weekDates = getWeekDates();
-
+// --- Render Headers ---
 function renderHeaders() {
+  const weekDates = getWeekDates(currentMonday);
   const fmt = (d, o) => d.toLocaleDateString('en-GB', o);
   const first = weekDates[0], last = weekDates[4];
-  document.querySelector('.header h1').textContent =
-    `${fmt(first, { month: 'long', day: 'numeric' })} – ${fmt(last, { day: 'numeric' })}, ${last.getFullYear()}`;
+
+  document.getElementById('week-title').textContent =
+    `${fmt(first, { month: 'short', day: 'numeric' })} – ${fmt(last, { month: 'short', day: 'numeric' })}, ${last.getFullYear()}`;
 
   document.querySelectorAll('.day-header').forEach((el, i) => {
-    el.textContent = `${weekDates[i].getDate()} ${fmt(weekDates[i], { weekday: 'long' })}`;
+    const dayDate = weekDates[i];
+    el.textContent = `${fmt(dayDate, { weekday: 'short' })} ${dayDate.getDate()}/${dayDate.getMonth() + 1}`;
   });
 
   const todayIdx = getTodayIndex();
@@ -101,8 +120,9 @@ function renderHeaders() {
     col.classList.toggle('today', i === todayIdx));
 }
 
-// Index (0-4) of today within the shown week, or -1 (weekend)
+// Index (0-4) of today within currently displayed week, or -1
 function getTodayIndex() {
+  const weekDates = getWeekDates(currentMonday);
   const now = new Date();
   return weekDates.findIndex(d =>
     d.getFullYear() === now.getFullYear() &&
@@ -110,7 +130,7 @@ function getTodayIndex() {
     d.getDate() === now.getDate());
 }
 
-// --- Time axis (labels are positioned in %, exactly on their hour line) ---
+// --- Time Axis ---
 function renderTimeAxis() {
   const axis = document.getElementById('time-labels');
   axis.innerHTML = '';
@@ -123,7 +143,7 @@ function renderTimeAxis() {
   }
 }
 
-// --- Overlap layout (like Google Calendar: overlapping events share the width) ---
+// --- Overlap Layout ---
 function layoutDay(list) {
   const items = list.sort((a, b) => a.s - b.s || a.e - b.e);
   let cluster = [], clusterEnd = -1;
@@ -150,19 +170,29 @@ function layoutDay(list) {
 function addLine(parent, className, text) {
   const div = document.createElement('div');
   div.className = className;
-  div.textContent = text;           // textContent: DB values can't inject HTML
+  div.textContent = text;
   parent.appendChild(div);
 }
 
-// --- Render events ---
+// --- Render Events for Current Week ---
 function renderEvents() {
+  const weekDates = getWeekDates(currentMonday);
+
   for (let i = 0; i < 5; i++) {
     const el = document.getElementById(`day-${i}`);
     if (!el) continue;
     el.innerHTML = '';
 
+    const currentDayDateStr = formatDateISO(weekDates[i]);
+
+    // Filter events matching either specific date OR recurring day index
     const dayEvents = events
-      .filter(ev => Number(ev.day) === i)
+      .filter(ev => {
+        if (ev.date) {
+          return ev.date === currentDayDateStr;
+        }
+        return Number(ev.day) === i;
+      })
       .map(ev => ({
         ev,
         s: Math.max(toMinutes(ev.start), START_MIN),
@@ -172,13 +202,16 @@ function renderEvents() {
 
     layoutDay(dayEvents).forEach(({ ev, s, e, col, cols }) => {
       const card = document.createElement('div');
-      card.className = `event-card ${ev.color || 'blue'}`;
+      card.className = `event-card ${ev.color || 'blue'} ${ev.date ? 'date-specific' : ''}`;
       card.style.top = `${toPercent(s)}%`;
       card.style.height = `${((e - s) / TOTAL_MIN) * 100}%`;
       card.style.left = `calc(${(col / cols) * 100}% + 0.15rem)`;
       card.style.width = `calc(${100 / cols}% - 0.3rem)`;
 
       addLine(card, 'event-time', `${toHM(toMinutes(ev.start))} - ${toHM(toMinutes(ev.end))}`);
+      if (ev.date) {
+        addLine(card, 'event-badge', ev.type === 'Exam' ? 'EXAM' : 'ONE-OFF');
+      }
       addLine(card, 'event-title', ev.title);
       addLine(card, 'event-type', ev.type);
       addLine(card, 'event-room', ev.room);
@@ -193,7 +226,7 @@ function renderEvents() {
   updateLiveMarker();
 }
 
-// --- Load events of one person ---
+// --- Fetch Events ---
 async function fetchEvents(person) {
   if (supabaseClient) {
     try {
@@ -204,11 +237,10 @@ async function fetchEvents(person) {
       console.warn('Supabase fetch failed.', err);
     }
   }
-  // Offline fallback: the built-in timetable belongs to the default person
   return person === PEOPLE[0].id ? [...initialEvents] : [];
 }
 
-// --- Live marker: only in today's column, positioned in % of the same scale ---
+// --- Live Marker ---
 function updateLiveMarker() {
   document.querySelectorAll('.live-marker').forEach(m => m.remove());
 
@@ -226,7 +258,34 @@ function updateLiveMarker() {
   document.getElementById(`day-${todayIdx}`).appendChild(marker);
 }
 
-// --- Mobile day view ---
+// --- Navigation Controls ---
+document.getElementById('prev-week-btn').addEventListener('click', () => {
+  currentMonday.setDate(currentMonday.getDate() - 7);
+  updateCalendarView();
+});
+document.getElementById('next-week-btn').addEventListener('click', () => {
+  currentMonday.setDate(currentMonday.getDate() + 7);
+  updateCalendarView();
+});
+document.getElementById('today-btn').addEventListener('click', () => {
+  currentMonday = getMonday(new Date());
+  updateCalendarView();
+});
+document.getElementById('jump-date-picker').addEventListener('change', (e) => {
+  if (e.target.value) {
+    const selectedDate = new Date(e.target.value + "T00:00:00");
+    currentMonday = getMonday(selectedDate);
+    updateCalendarView();
+  }
+});
+
+function updateCalendarView() {
+  renderHeaders();
+  renderEvents();
+  document.getElementById('jump-date-picker').value = formatDateISO(currentMonday);
+}
+
+// --- Mobile Day View ---
 function setMobileDay(dayIdx) {
   currentMobileDay = Math.min(Math.max(dayIdx, 0), 4);
   document.querySelectorAll('.day-column').forEach((col, idx) =>
@@ -237,38 +296,61 @@ function setMobileDay(dayIdx) {
 document.getElementById('prev-day-btn').addEventListener('click', () => setMobileDay(currentMobileDay - 1));
 document.getElementById('next-day-btn').addEventListener('click', () => setMobileDay(currentMobileDay + 1));
 
-// --- Add / Edit / Delete modal ---
+// --- Modal Handling ---
 const modal = document.getElementById('exam-modal');
 const form = document.getElementById('exam-form');
 const modalTitle = modal.querySelector('h3');
 const typeSelect = document.getElementById('exam-type');
+const modeSelect = document.getElementById('exam-mode');
+const dateGroup = document.getElementById('specific-date-group');
+const dayGroup = document.getElementById('recurring-day-group');
 const saveBtn = document.getElementById('save-exam-btn');
-const ADD_TITLE = modalTitle.textContent;   // keeps whatever wording index.html uses
+const ADD_TITLE = modalTitle.textContent;
 const ADD_SAVE = saveBtn.textContent;
-let editingEvent = null;   // the event being edited, or null when adding
+let editingEvent = null;
 
-// Delete button is created here, so index.html needs no change
 const deleteBtn = document.createElement('button');
 deleteBtn.type = 'button';
 deleteBtn.className = 'danger hidden';
 deleteBtn.textContent = 'Delete';
 modal.querySelector('.modal-actions').prepend(deleteBtn);
 
+modeSelect.addEventListener('change', () => {
+  const isDate = modeSelect.value === 'date';
+  dateGroup.classList.toggle('hidden', !isDate);
+  dayGroup.classList.toggle('hidden', isDate);
+});
+
 function openModal(ev = null) {
   editingEvent = ev;
   form.reset();
+
+  const todayStr = formatDateISO(new Date());
+  document.getElementById('exam-date').value = todayStr;
+
   if (ev) {
-    // timetable entries have free-text types ("Group 1 - Theory"), make sure the select can show them
     if (![...typeSelect.options].some(o => o.value === ev.type)) {
       typeSelect.add(new Option(ev.type, ev.type));
     }
     document.getElementById('exam-title').value = ev.title;
     typeSelect.value = ev.type;
-    document.getElementById('exam-day').value = String(ev.day);
+
+    if (ev.date) {
+      modeSelect.value = 'date';
+      document.getElementById('exam-date').value = ev.date;
+    } else {
+      modeSelect.value = 'recurring';
+      document.getElementById('exam-day').value = String(ev.day ?? 0);
+    }
+
     document.getElementById('exam-start').value = toHM(toMinutes(ev.start));
     document.getElementById('exam-end').value = toHM(toMinutes(ev.end));
     document.getElementById('exam-room').value = ev.room;
+  } else {
+    modeSelect.value = 'date';
   }
+
+  modeSelect.dispatchEvent(new Event('change'));
   modalTitle.textContent = ev ? 'Edit Event' : ADD_TITLE;
   saveBtn.textContent = ev ? 'Save Changes' : ADD_SAVE;
   deleteBtn.classList.toggle('hidden', !ev);
@@ -282,20 +364,30 @@ function closeModal() {
 
 document.getElementById('add-exam-btn').addEventListener('click', (e) => { e.preventDefault(); openModal(); });
 document.getElementById('close-modal-btn').addEventListener('click', closeModal);
-modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });   // click on backdrop
+modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !modal.classList.contains('hidden')) closeModal(); });
 
 form.addEventListener('submit', async (e) => {
   e.preventDefault();
 
+  const isDateMode = modeSelect.value === 'date';
   const data = {
     title: document.getElementById('exam-title').value,
     type: typeSelect.value,
-    day: parseInt(document.getElementById('exam-day').value, 10),
     start: document.getElementById('exam-start').value,
     end: document.getElementById('exam-end').value,
-    room: document.getElementById('exam-room').value
+    room: document.getElementById('exam-room').value,
+    color: typeSelect.value === 'Exam' ? 'orange' : 'blue',
+    person: currentPerson
   };
+
+  if (isDateMode) {
+    data.date = document.getElementById('exam-date').value;
+    data.day = null;
+  } else {
+    data.day = parseInt(document.getElementById('exam-day').value, 10);
+    data.date = null;
+  }
 
   if (toMinutes(data.end) <= toMinutes(data.start)) {
     alert('End time must be after start time.');
@@ -303,27 +395,27 @@ form.addEventListener('submit', async (e) => {
   }
 
   if (editingEvent) {
-    // UPDATE
     if (supabaseClient && editingEvent.id != null) {
       const { data: rows, error } = await supabaseClient
         .from('exams').update(data).eq('id', editingEvent.id).select();
       if (error || !rows || rows.length === 0) {
-        alert(`Could not save changes: ${error ? error.message : 'no row updated (check your Supabase update policy)'}`);
+        alert(`Could not save changes: ${error ? error.message : 'no row updated'}`);
         return;
       }
     }
+    // Update local object
+    delete editingEvent.date;
+    delete editingEvent.day;
     Object.assign(editingEvent, data);
   } else {
-    // INSERT
-    const newEvent = { ...data, color: 'orange', person: currentPerson };
-    let saved = newEvent;
+    let saved = { ...data };
     if (supabaseClient) {
-      const { data: rows, error } = await supabaseClient.from('exams').insert([newEvent]).select();
+      const { data: rows, error } = await supabaseClient.from('exams').insert([data]).select();
       if (error) {
         alert(`Could not save event: ${error.message}`);
         return;
       }
-      if (rows && rows[0]) saved = rows[0];   // contains the new id, needed for edit/delete later
+      if (rows && rows[0]) saved = rows[0];
     }
     events.push(saved);
   }
@@ -339,7 +431,7 @@ deleteBtn.addEventListener('click', async () => {
     const { data: rows, error } = await supabaseClient
       .from('exams').delete().eq('id', editingEvent.id).select();
     if (error || !rows || rows.length === 0) {
-      alert(`Could not delete: ${error ? error.message : 'no row deleted (check your Supabase delete policy)'}`);
+      alert(`Could not delete: ${error ? error.message : 'no row deleted'}`);
       return;
     }
   }
@@ -348,7 +440,7 @@ deleteBtn.addEventListener('click', async () => {
   closeModal();
 });
 
-// --- Switch schedule by clicking the name in the sidebar ---
+// --- Person Switcher ---
 const nameLink = document.querySelector('.sidebarHeader');
 nameLink.style.cursor = 'pointer';
 
@@ -367,25 +459,19 @@ nameLink.addEventListener('click', async (e) => {
 
   const token = ++loadToken;
   const list = await fetchEvents(currentPerson);
-  if (token !== loadToken) return;      // a newer click already won
+  if (token !== loadToken) return;
   events = list;
   renderEvents();
 });
 
 // --- Init ---
 window.addEventListener('DOMContentLoaded', async () => {
-  renderHeaders();
   renderTimeAxis();
   updateNameLink();
   events = await fetchEvents(currentPerson);
-  renderEvents();
+  updateCalendarView();
 
   setInterval(() => {
-    const newWeek = getWeekDates();
-    if (newWeek[0].getTime() !== weekDates[0].getTime()) {   // new week started while page is open
-      weekDates = newWeek;
-      renderHeaders();
-    }
     updateLiveMarker();
   }, 30000);
 
