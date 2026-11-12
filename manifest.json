@@ -1,7 +1,7 @@
 {
   "name": "Schedule View",
   "short_name": "Schedule",
-  "start_url": "/",
+  "start_url": "/university_manager/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#ffffff",
