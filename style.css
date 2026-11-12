@@ -376,31 +376,54 @@ body {
 }
 
 @media (max-width: 700px) {
-  .header-content {
-    flex-direction: column;
-    gap: 0.5rem;
-    align-items: flex-start;
+  /* Grid auf 1 Spalte umstellen und Elemente in die korrekte Reihenfolge bringen */
+  .gridContainer {
+    grid-template-columns: 1fr;
+    grid-template-areas: 
+      "navbar"
+      "header"
+      "content";
+    padding: 0;
   }
-  .week-nav {
-    width: 100%;
-    justify-content: space-between;
-  }
-}
-/* Mobile */
-@media (max-width: 700px) {
-  :root { --hour-h: 4.5rem; --time-col-w: 3.5rem; }
-  .gridContainer { grid-template-columns: 1fr; padding: 0; }
-  .sidebar {
+
+  /* Weweise den Elementen ihre Grid-Area zu, damit sie oben bleiben */
+  .sidebar { /* Falls das deine Navbar/Topbar ist */
+    grid-area: navbar;
     grid-column: 1;
-    grid-row: auto;
     writing-mode: horizontal-tb;
     padding: 0.8rem;
     flex-direction: row;
     justify-content: space-between;
   }
-  .header { grid-column: 1; grid-row: auto; }
+
+  .header { 
+    grid-area: header;
+    grid-column: 1; 
+  }
+
+  .schedule-container { 
+    grid-area: content;
+    grid-column: 1; 
+    overflow-x: hidden; 
+  }
+
+  .header-content {
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: flex-start;
+  }
+  
+  .week-nav {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  :root { 
+    --hour-h: 4.5rem; 
+    --time-col-w: 3.5rem; 
+  }
+
   .mobile-day-selector { display: flex; }
-  .schedule-container { grid-column: 1; overflow-x: hidden; }
   .timetable { min-width: 100%; }
   .day-column { display: none; }          /* JS shows the active day */
   .day-column.active-mobile { display: flex; }
